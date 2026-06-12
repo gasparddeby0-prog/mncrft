@@ -24,6 +24,7 @@ import { createTextureAtlas, tileDataUrl } from '../render/TextureAtlas';
 import { buildChunkMaterials } from '../render/Materials';
 import { Environment, type Weather } from '../render/Environment';
 import { BlockHighlight } from '../render/BlockHighlight';
+import { EntityManager } from '../entity/EntityManager';
 import { Player } from '../player/Player';
 import { Interaction } from '../player/Interaction';
 import { BLOCKS, PLACEABLE_BLOCKS, getBlock } from '../world/Block';
@@ -44,6 +45,7 @@ export class Game {
   private readonly player: Player;
   private readonly interaction: Interaction;
   private readonly highlight: BlockHighlight;
+  private readonly entities: EntityManager;
   private readonly hud: HUD;
   private readonly store = new WorldStore();
   private readonly generator: TerrainGenerator;
@@ -84,8 +86,11 @@ export class Game {
     this.highlight = new BlockHighlight();
     this.engine.scene.add(this.highlight.object);
 
+    this.entities = new EntityManager();
+    this.engine.scene.add(this.entities.group);
+
     this.player = new Player(this.world);
-    this.interaction = new Interaction(this.world, this.chunks, this.player, this.highlight);
+    this.interaction = new Interaction(this.world, this.chunks, this.player, this.highlight, this.entities);
 
     const hudRoot = document.getElementById('hud')!;
     this.hud = new HUD(hudRoot);
@@ -250,6 +255,7 @@ export class Game {
       };
       this.player.update(dt, move);
       this.interaction.update(dt, input);
+      this.entities.update(dt, this.world, this.player, this.environment.timeOfDay);
 
       if (this.player.health <= 0) this.respawn();
     }
@@ -324,6 +330,7 @@ export class Game {
       `chunks   ${this.world.loadedChunkCount} loaded`,
       `gen      ${this.pool.pendingCount} pending`,
       `mesh Q   ${this.chunks.queuedMeshCount}`,
+      `mobs     ${this.entities.count} (${this.entities.hostileCount} hostile)`,
       `time     ${this.environment.clock}  (${this.environment.weather})`,
       `mode     ${this.player.flying ? 'fly' : this.player.onGround ? 'ground' : 'air'}`,
     ].join('\n');

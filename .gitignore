@@ -6,3 +6,6 @@ dist-types/
 .vite/
 scripts/*.mjs
 .kiro/
+
+# nested GitHub clone used only for pushing
+mncrft/

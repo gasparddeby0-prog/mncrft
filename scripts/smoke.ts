@@ -10,6 +10,9 @@ import { World } from '../src/world/World';
 import { Chunk } from '../src/world/Chunk';
 import { raycast } from '../src/player/VoxelRaycaster';
 import { ChunkMesher, RenderLayer } from '../src/render/ChunkMesher';
+import { Cow, Zombie } from '../src/entity/mobs';
+import { EntityManager } from '../src/entity/EntityManager';
+import { Player } from '../src/player/Player';
 
 let failures = 0;
 function assert(cond: unknown, msg: string): void {
@@ -91,6 +94,55 @@ const geo = mesher.build(world.getChunk(0, 0)!);
 const solid = geo[RenderLayer.SOLID];
 assert(solid !== null && solid.attributes.position.count > 0, 'mesher produced solid geometry');
 assert(solid !== null && solid.getAttribute('color').count === solid.getAttribute('position').count, 'color/position attribute counts match');
+
+console.log('entities');
+function surfaceY(x: number, z: number): number {
+  for (let y = WORLD_HEIGHT - 1; y >= 1; y--) {
+    if (world.isSolid(Math.floor(x), y, Math.floor(z))) return y;
+  }
+  return 0;
+}
+
+// A cow dropped above the ground should fall and settle on the surface.
+const cow = new Cow();
+const cowSurface = surfaceY(8.5, 8.5);
+cow.setPosition(8.5, cowSurface + 4, 8.5);
+const ctx = { world, player: new Player(world), timeOfDay: 0.25 };
+ctx.player.setPosition(8.5, cowSurface + 1, 8.5);
+for (let i = 0; i < 180; i++) cow.update(1 / 60, ctx as any);
+assert(cow.onGround, 'cow lands on the ground');
+assert(Math.abs(cow.position.y - (cowSurface + 1)) < 0.2, `cow rests on the surface (y=${cow.position.y.toFixed(2)}, surface+1=${cowSurface + 1})`);
+
+// A zombie should move toward a nearby player.
+const zombie = new Zombie();
+const zStart = surfaceY(2.5, 2.5);
+zombie.setPosition(2.5, zStart + 1, 2.5);
+const target = new Player(world);
+const pSurface = surfaceY(13.5, 13.5);
+target.setPosition(13.5, pSurface + 1, 13.5);
+const zctx = { world, player: target, timeOfDay: 0.75 };
+const startDist = Math.hypot(target.position.x - zombie.position.x, target.position.z - zombie.position.z);
+for (let i = 0; i < 60; i++) zombie.update(1 / 60, zctx as any);
+const endDist = Math.hypot(target.position.x - zombie.position.x, target.position.z - zombie.position.z);
+assert(endDist < startDist - 0.3, `zombie chases the player (dist ${startDist.toFixed(2)} -> ${endDist.toFixed(2)})`);
+
+// EntityManager raycast should hit an entity in the line of fire.
+const manager = new EntityManager();
+const targetCow = new Cow();
+targetCow.setPosition(0, 0, -3);
+manager.addEntity(targetCow);
+const eHit = manager.raycast(
+  { x: 0, y: 0.7, z: 0 } as any,
+  { x: 0, y: 0, z: -1 } as any,
+  5,
+);
+assert(eHit !== null && eHit.entity === targetCow, 'entity raycast hits a mob in front');
+
+// Damage + knockback kills and flags the entity dead.
+const victim = new Cow();
+victim.setPosition(0, 0, 0);
+victim.damage(100, 0, 1);
+assert(victim.dead, 'lethal damage marks the entity dead');
 
 console.log(failures ? `\n${failures} FAILURE(S)` : '\nALL CHECKS PASSED');
 if (failures) process.exit(1);

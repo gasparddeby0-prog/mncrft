@@ -35,6 +35,10 @@ problème de licence.
 - 🕹️ **Contrôleur première personne** : marche, course, accroupissement, saut,
   **vol**, **nage**, collisions AABB par axe, **dégâts de chute** et régénération.
 - 🔨 **Casser / poser** des blocs avec ray casting voxel (DDA) et surbrillance.
+- 🐄 **Créatures vivantes** : vaches, cochons et poules (IA passive : errance,
+  fuite quand on les frappe) et **zombies hostiles** (poursuite + attaque au
+  corps à corps). Modèles cubiques **animés** (pattes, ailes, bras), apparition
+  jour/nuit, combat (clic gauche) avec recul.
 - ☀️🌙 **Cycle jour/nuit complet** avec soleil/lune, ciel et brouillard dynamiques.
 - 🌧️ **Météo** : pluie, **orages** (éclairs), neige — système de particules réel.
 - 💾 **Sauvegarde automatique** (IndexedDB) du joueur et des blocs modifiés.
@@ -88,7 +92,7 @@ Guide détaillé : [`docs/BUILD.md`](docs/BUILD.md).
 | S'accroupir / descendre (vol) | `Shift` |
 | Courir | `Ctrl` |
 | Activer/désactiver le vol | `F` |
-| Casser un bloc | Clic gauche |
+| Casser un bloc / attaquer un mob | Clic gauche |
 | Poser un bloc | Clic droit |
 | Sélectionner un bloc | `1`–`0` ou molette |
 | Météo suivante | `R` |

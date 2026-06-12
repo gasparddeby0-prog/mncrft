@@ -17,8 +17,8 @@ dans ce dépôt. Honnêteté avant tout : `✅ fait`, `🟡 partiel`, `⬜ à ve
 | Crafting identique à Minecraft | ⬜ | Système d'objets/recettes à implémenter. |
 | Fourneaux, coffres, enclumes, tables d'enchantement | ⬜ | Nécessite blocs à entité + UI dédiées. |
 | Survie : faim, vie, régénération, dégâts de chute | 🟡 | Vie ✅, régénération ✅, dégâts de chute ✅. Faim/nourriture ⬜. |
-| IA des créatures (passives/hostiles) | ⬜ | Pathfinding + state machines à venir. |
-| Zombies, squelettes, creepers, araignées, animaux | ⬜ | Dépend de l'IA + entités + modèles. |
+| IA des créatures (passives/hostiles) | 🟡 | Errance/fuite (passifs) + poursuite/attaque (zombie). Pathfinding A* ⬜. |
+| Zombies, squelettes, creepers, araignées, animaux | 🟡 | Vache/cochon/poule + zombie ✅. Squelettes/creepers/araignées ⬜. |
 | Villages, grottes, ravins, donjons, structures | 🟡 | Grottes ✅. Ravins/villages/donjons/structures ⬜. |
 | Minéraux selon la profondeur | ✅ | Charbon/fer/or/diamant par paliers. |
 | Redstone + logique électrique | ⬜ | Simulation de signal à concevoir. |
@@ -64,8 +64,9 @@ dans ce dépôt. Honnêteté avant tout : `✅ fait`, `🟡 partiel`, `⬜ à ve
 1. **Greedy meshing** + déplacement du maillage dans des workers (perf).
 2. **Propagation de lumière** (skylight/blocklight) pour un éclairage type
    Minecraft, en plus de l'AO actuel.
-3. **Système d'entités** générique → base pour mobs, animaux, objets lâchés.
-4. **Inventaire + crafting** (modèle d'items, recettes, conteneurs).
+3. **Inventaire + crafting** (modèle d'items, recettes, conteneurs) — prochain lot.
+4. ~~Système d'entités~~ ✅ fait (base `Entity` + mobs animés). Étendre : autres
+   mobs (squelette, creeper, araignée), drops, pathfinding A*.
 5. **Structures** (villages, donjons, ravins) via un générateur de features.
 6. **Multijoueur** : extraire la simulation `world/` côté serveur (Node + WS),
    diffuser les deltas de blocs et les positions.

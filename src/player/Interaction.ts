@@ -14,10 +14,12 @@ import type { World } from '../world/World';
 import type { Input } from '../core/Input';
 import type { Player } from './Player';
 import type { BlockHighlight } from '../render/BlockHighlight';
+import type { EntityManager } from '../entity/EntityManager';
 import { raycast, type RaycastHit } from './VoxelRaycaster';
 
 const REACH = 5;
 const ACTION_INTERVAL = 0.18; // seconds between repeated break/place while held
+const ATTACK_INTERVAL = 0.4; // seconds between melee hits
 
 // Player AABB (kept in sync with Player.ts).
 const PLAYER_HALF_WIDTH = 0.3;
@@ -32,16 +34,19 @@ export class Interaction {
   private readonly dir = new THREE.Vector3();
   private readonly eye = new THREE.Vector3();
   private actionTimer = 0;
+  private attackTimer = 0;
 
   constructor(
     private readonly world: World,
     private readonly chunks: ChunkManager,
     private readonly player: Player,
     private readonly highlight: BlockHighlight,
+    private readonly entities: EntityManager,
   ) {}
 
   update(dt: number, input: Input): void {
     this.actionTimer -= dt;
+    this.attackTimer -= dt;
 
     // Forward direction from yaw/pitch (matches Player's convention).
     const cp = Math.cos(this.player.pitch);
@@ -52,24 +57,39 @@ export class Interaction {
     );
     this.player.getEye(this.eye);
 
-    const hit = raycast(this.world, this.eye, this.dir, REACH);
-    this.currentHit = hit;
+    const blockHit = raycast(this.world, this.eye, this.dir, REACH);
+    this.currentHit = blockHit;
+    const entityHit = this.entities.raycast(this.eye, this.dir, REACH);
 
-    if (!hit) {
-      this.highlight.hide();
-      return;
-    }
-    this.highlight.showAt(hit.bx, hit.by, hit.bz);
+    // The outline only ever marks a block.
+    if (blockHit) this.highlight.showAt(blockHit.bx, blockHit.by, blockHit.bz);
+    else this.highlight.hide();
 
-    const breaking = input.isButtonDown(0);
-    const placing = input.isButtonDown(2);
+    const blockDist = blockHit
+      ? Math.hypot(
+          this.eye.x - (blockHit.bx + 0.5),
+          this.eye.y - (blockHit.by + 0.5),
+          this.eye.z - (blockHit.bz + 0.5),
+        )
+      : Infinity;
 
-    if ((breaking || placing) && this.actionTimer <= 0) {
-      if (breaking) {
-        this.breakBlock(hit);
-      } else if (placing) {
-        this.placeBlock(hit);
+    // Left button: attack a mob if one is in front and nearer than any block,
+    // otherwise break the targeted block.
+    if (input.isButtonDown(0)) {
+      if (entityHit && entityHit.distance <= blockDist) {
+        if (this.attackTimer <= 0) {
+          entityHit.entity.damage(4, this.dir.x, this.dir.z);
+          this.attackTimer = ATTACK_INTERVAL;
+        }
+      } else if (blockHit && this.actionTimer <= 0) {
+        this.breakBlock(blockHit);
+        this.actionTimer = ACTION_INTERVAL;
       }
+    }
+
+    // Right button: place against the targeted block face.
+    if (input.isButtonDown(2) && blockHit && this.actionTimer <= 0) {
+      this.placeBlock(blockHit);
       this.actionTimer = ACTION_INTERVAL;
     }
   }
