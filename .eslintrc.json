@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "worker": true
+  },
+  "ignorePatterns": ["dist", "dist-types", "node_modules"],
+  "rules": {
+    "no-unused-vars": "off",
+    "prefer-const": "warn"
+  }
+}

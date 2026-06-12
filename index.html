@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoxelCraft</title>
+  </head>
+  <body>
+    <!-- Render target -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Start / pause overlay -->
+    <div id="overlay" class="overlay">
+      <div class="panel">
+        <h1>VoxelCraft</h1>
+        <p class="subtitle">An original voxel engine built from scratch</p>
+        <button id="play-button">Click to Play</button>
+        <ul class="controls">
+          <li><b>WASD</b> move &middot; <b>Mouse</b> look &middot; <b>Space</b> jump / up</li>
+          <li><b>Shift</b> sneak / down &middot; <b>Ctrl</b> sprint &middot; <b>F</b> toggle fly</li>
+          <li><b>Left click</b> break &middot; <b>Right click</b> place</li>
+          <li><b>1-9</b> select block &middot; <b>Mouse wheel</b> cycle &middot; <b>F3</b> debug</li>
+          <li><b>Esc</b> release mouse</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- HUD layer (crosshair, hotbar, debug) is injected by src/ui -->
+    <div id="hud"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,278 @@
+/* VoxelCraft UI — a clean, modern overlay drawn on top of the WebGL canvas. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --panel-bg: rgba(15, 18, 28, 0.72);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --accent: #6cc6ff;
+  --text: #eef2f7;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #05070f;
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* --- Start / pause overlay --- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 30%, rgba(40, 60, 100, 0.55), rgba(5, 7, 15, 0.92));
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.panel {
+  text-align: center;
+  padding: 40px 52px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  max-width: 520px;
+}
+
+.panel h1 {
+  font-size: 52px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #7fd4a0, #6cc6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 6px;
+}
+
+.panel .subtitle {
+  opacity: 0.7;
+  margin-bottom: 26px;
+  font-size: 15px;
+}
+
+#play-button {
+  pointer-events: auto;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 34px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #06121f;
+  background: linear-gradient(90deg, #7fd4a0, #6cc6ff);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+#play-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(108, 198, 255, 0.4);
+}
+
+.controls {
+  list-style: none;
+  margin-top: 26px;
+  font-size: 13px;
+  line-height: 1.9;
+  opacity: 0.82;
+}
+
+.controls b {
+  color: var(--accent);
+}
+
+/* --- Crosshair --- */
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: '';
+  position: absolute;
+  background: #ffffff;
+}
+
+.crosshair::before {
+  left: 50%;
+  top: 2px;
+  width: 2px;
+  height: 18px;
+  transform: translateX(-50%);
+}
+
+.crosshair::after {
+  top: 50%;
+  left: 2px;
+  height: 2px;
+  width: 18px;
+  transform: translateY(-50%);
+}
+
+/* --- Hotbar --- */
+.hotbar {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+}
+
+.slot {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot img {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
+
+.slot .key {
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.slot.selected {
+  border-color: var(--accent);
+  background: rgba(108, 198, 255, 0.18);
+  box-shadow: 0 0 14px rgba(108, 198, 255, 0.35);
+}
+
+/* --- Health bar --- */
+.health {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 12px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+}
+
+.health-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #ff5a5a, #ff8a5a);
+  transition: width 0.2s ease;
+}
+
+/* --- Debug overlay --- */
+.debug {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 10px 14px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  font-family: 'Consolas', 'SF Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre;
+  display: none;
+}
+
+.debug.visible {
+  display: block;
+}
+
+/* --- Toast messages --- */
+.toasts {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.toast {
+  padding: 8px 18px;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Damage vignette --- */
+.hurt {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, transparent 55%, rgba(170, 0, 0, 0.55));
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+.hurt.show {
+  opacity: 1;
+}
