@@ -40,6 +40,8 @@ export class Player {
   sprinting = false;
 
   health = MAX_HEALTH;
+  /** Armour defense points (0..20), refreshed from the inventory each frame. */
+  armorPoints = 0;
 
   /** Optional callback fired when the player takes damage (for HUD feedback). */
   onDamage: ((amount: number) => void) | null = null;
@@ -49,7 +51,7 @@ export class Player {
   private regenTimer = 0;
   private hurtCooldown = 0;
 
-  constructor(private readonly world: World) {}
+  constructor(public world: World) {}
 
   setPosition(x: number, y: number, z: number): void {
     this.position.set(x, y, z);
@@ -225,10 +227,12 @@ export class Player {
 
   damage(amount: number): void {
     if (amount <= 0 || this.hurtCooldown > 0) return;
-    this.health = Math.max(0, this.health - amount);
+    // Armour mitigation: each point reduces incoming damage by 4% (max 80%).
+    const mitigated = amount * (1 - Math.min(20, this.armorPoints) * 0.04);
+    this.health = Math.max(0, this.health - mitigated);
     this.hurtCooldown = 0.5;
     this.regenTimer = 0;
-    this.onDamage?.(amount);
+    this.onDamage?.(mitigated);
   }
 
   private tickHealth(dt: number): void {

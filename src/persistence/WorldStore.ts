@@ -14,7 +14,7 @@
  * cache, and writing changes back to disk on a debounced flush.
  */
 
-import type { ChunkManager, ChunkPersistence } from '../world/ChunkManager';
+import type { ChunkPersistence } from '../world/ChunkManager';
 import type { Chunk } from '../world/Chunk';
 import { chunkKey } from '../world/coords';
 
@@ -31,9 +31,10 @@ export interface PlayerSave {
   pitch: number;
   flying: boolean;
   health: number;
-  selected: number;
   timeOfDay: number;
   weather: string;
+  dimension: number;
+  inventory: unknown;
 }
 
 export class WorldStore implements ChunkPersistence {
@@ -155,7 +156,7 @@ export class WorldStore implements ChunkPersistence {
   }
 
   /** Persist everything now (used by auto-save and before unload). */
-  async persistAll(manager: ChunkManager, player: PlayerSave): Promise<void> {
+  async persistAll(manager: { saveAllModified(): void }, player: PlayerSave): Promise<void> {
     manager.saveAllModified();
     await this.flush();
     await this.savePlayer(player);

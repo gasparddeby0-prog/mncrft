@@ -276,3 +276,143 @@ body {
 .hurt.show {
   opacity: 1;
 }
+
+
+/* --- Inventory / crafting / furnace / chest screen --- */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 7, 15, 0.6);
+  backdrop-filter: blur(3px);
+  pointer-events: auto;
+}
+
+.screen.visible {
+  display: flex;
+}
+
+.window {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  max-height: 92vh;
+  overflow: auto;
+}
+
+.window-title {
+  font-size: 20px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+.window-top {
+  display: flex;
+  gap: 26px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.craft-wrap {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.inv-section {
+  margin-bottom: 12px;
+}
+
+.inv-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.5;
+  margin-bottom: 5px;
+}
+
+.inv-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.inv-slot {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.inv-slot:hover {
+  background: rgba(108, 198, 255, 0.15);
+}
+
+.inv-slot img {
+  width: 44px;
+  height: 44px;
+  margin: 1px;
+  image-rendering: pixelated;
+}
+
+.inv-slot .count,
+.cursor-item .count {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000;
+}
+
+.inv-slot .durability {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  height: 3px;
+  background: linear-gradient(90deg, #ff4d4d, #6cff6c);
+  border-radius: 2px;
+}
+
+.cursor-item {
+  position: fixed;
+  display: none;
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  z-index: 40;
+}
+
+.cursor-item img {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+}
+
+/* Hotbar item counts (HUD) */
+.slot .count {
+  position: absolute;
+  right: 3px;
+  bottom: 1px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000, -1px 1px 0 #000, 1px -1px 0 #000, -1px -1px 0 #000;
+}
+
+.slot .durability {
+  position: absolute;
+  left: 4px;
+  bottom: 3px;
+  height: 3px;
+  background: linear-gradient(90deg, #ff4d4d, #6cff6c);
+  border-radius: 2px;
+}

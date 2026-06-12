@@ -19,6 +19,7 @@ import { Chunk, ChunkState } from './Chunk';
 import { chunkKey, parseChunkKey, worldToChunk } from './coords';
 import type { WorkerPool } from '../workers/WorkerPool';
 import type { World } from './World';
+import { Dimension } from './dimensions/Dimension';
 
 /** Optional persistence hooks supplied by the save system. */
 export interface ChunkPersistence {
@@ -54,13 +55,11 @@ export class ChunkManager {
     private readonly pool: WorkerPool,
     private readonly materials: ChunkMaterials,
     renderDistance: number,
+    readonly dimension: Dimension = Dimension.OVERWORLD,
   ) {
     this.renderDistance = renderDistance;
     this.mesher = new ChunkMesher(world);
-    this.group.name = 'chunks';
-
-    // When a worker finishes generating a chunk, register it and queue meshing.
-    this.pool.setCallback((cx, cz, voxels) => this.onGenerated(cx, cz, voxels));
+    this.group.name = `chunks-${dimension}`;
   }
 
   setPersistence(p: ChunkPersistence): void {
@@ -110,13 +109,13 @@ export class ChunkManager {
     wanted.sort((a, b) => a.d - b.d);
 
     for (const w of wanted) {
-      if (this.world.hasChunk(w.cx, w.cz) || this.pool.isPending(w.cx, w.cz)) continue;
+      if (this.world.hasChunk(w.cx, w.cz) || this.pool.isPending(w.cx, w.cz, this.dimension)) continue;
       // Prefer saved data when available, otherwise generate procedurally.
       const saved = this.persistence?.load(w.cx, w.cz) ?? null;
       if (saved) {
-        this.onGenerated(w.cx, w.cz, saved);
+        this.acceptGenerated(w.cx, w.cz, saved);
       } else {
-        this.pool.request(w.cx, w.cz);
+        this.pool.request(w.cx, w.cz, this.dimension);
       }
     }
 
@@ -130,7 +129,8 @@ export class ChunkManager {
     }
   }
 
-  private onGenerated(cx: number, cz: number, voxels: Uint8Array): void {
+  /** Register a generated (or loaded) chunk and queue it + neighbours for meshing. */
+  acceptGenerated(cx: number, cz: number, voxels: Uint8Array): void {
     if (this.world.hasChunk(cx, cz)) return;
     const chunk = new Chunk(cx, cz, voxels);
     chunk.state = ChunkState.GENERATED;
@@ -224,7 +224,7 @@ export class ChunkManager {
     }
 
     this.world.removeChunk(chunk.cx, chunk.cz);
-    this.pool.cancel(chunk.cx, chunk.cz);
+    this.pool.cancel(chunk.cx, chunk.cz, this.dimension);
 
     const idx = this.meshQueue.indexOf(key);
     if (idx >= 0) this.meshQueue.splice(idx, 1);

@@ -9,11 +9,12 @@ export interface InitMessage {
   seed: number;
 }
 
-/** Request to generate the voxel data for a chunk. */
+/** Request to generate the voxel data for a chunk in a given dimension. */
 export interface GenerateMessage {
   type: 'generate';
   cx: number;
   cz: number;
+  dimension: number;
 }
 
 export type WorkerRequest = InitMessage | GenerateMessage;
@@ -23,6 +24,7 @@ export interface GeneratedMessage {
   type: 'generated';
   cx: number;
   cz: number;
+  dimension: number;
   /** Transferred Uint8Array buffer with CHUNK_VOLUME bytes. */
   voxels: ArrayBuffer;
 }

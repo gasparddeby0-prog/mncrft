@@ -29,6 +29,17 @@ export enum BlockType {
   GLASS = 17,
   LAVA = 18,
   CACTUS = 19,
+  CRAFTING_TABLE = 20,
+  FURNACE = 21,
+  OBSIDIAN = 22,
+  NETHERRACK = 23,
+  GLOWSTONE = 24,
+  SOUL_SAND = 25,
+  END_STONE = 26,
+  NETHER_PORTAL = 27,
+  END_PORTAL = 28,
+  CHEST = 29,
+  SPAWNER = 30,
 }
 
 /**
@@ -59,6 +70,19 @@ export const Tile = {
   LAVA: 19,
   CACTUS_SIDE: 20,
   CACTUS_TOP: 21,
+  CRAFTING_TOP: 22,
+  CRAFTING_SIDE: 23,
+  FURNACE_FRONT: 24,
+  FURNACE_TOP: 25,
+  OBSIDIAN: 26,
+  NETHERRACK: 27,
+  GLOWSTONE: 28,
+  SOUL_SAND: 29,
+  END_STONE: 30,
+  NETHER_PORTAL: 31,
+  END_PORTAL: 32,
+  CHEST: 33,
+  SPAWNER: 34,
 } as const;
 
 /** Per-face tile indices in order: +X, -X, +Y(top), -Y(bottom), +Z, -Z. */
@@ -125,6 +149,17 @@ export const BLOCKS: BlockDefinition[] = [
   { id: BlockType.GLASS, name: 'Glass', solid: true, opaque: false, transparent: true, liquid: false, light: 0, faces: uniform(Tile.GLASS) },
   { id: BlockType.LAVA, name: 'Lava', solid: false, opaque: true, transparent: false, liquid: true, light: 15, faces: uniform(Tile.LAVA) },
   { id: BlockType.CACTUS, name: 'Cactus', solid: true, opaque: false, transparent: true, liquid: false, light: 0, faces: column(Tile.CACTUS_TOP, Tile.CACTUS_TOP, Tile.CACTUS_SIDE) },
+  { id: BlockType.CRAFTING_TABLE, name: 'Crafting Table', solid: true, opaque: true, transparent: false, liquid: false, light: 0, faces: column(Tile.CRAFTING_TOP, Tile.PLANKS, Tile.CRAFTING_SIDE) },
+  { id: BlockType.FURNACE, name: 'Furnace', solid: true, opaque: true, transparent: false, liquid: false, light: 0, faces: column(Tile.FURNACE_TOP, Tile.FURNACE_TOP, Tile.FURNACE_FRONT) },
+  { id: BlockType.OBSIDIAN, name: 'Obsidian', solid: true, opaque: true, transparent: false, liquid: false, light: 0, faces: uniform(Tile.OBSIDIAN) },
+  { id: BlockType.NETHERRACK, name: 'Netherrack', solid: true, opaque: true, transparent: false, liquid: false, light: 0, faces: uniform(Tile.NETHERRACK) },
+  { id: BlockType.GLOWSTONE, name: 'Glowstone', solid: true, opaque: true, transparent: false, liquid: false, light: 15, faces: uniform(Tile.GLOWSTONE) },
+  { id: BlockType.SOUL_SAND, name: 'Soul Sand', solid: true, opaque: true, transparent: false, liquid: false, light: 0, faces: uniform(Tile.SOUL_SAND) },
+  { id: BlockType.END_STONE, name: 'End Stone', solid: true, opaque: true, transparent: false, liquid: false, light: 0, faces: uniform(Tile.END_STONE) },
+  { id: BlockType.NETHER_PORTAL, name: 'Nether Portal', solid: false, opaque: false, transparent: true, liquid: false, light: 11, faces: uniform(Tile.NETHER_PORTAL) },
+  { id: BlockType.END_PORTAL, name: 'End Portal', solid: false, opaque: false, transparent: true, liquid: false, light: 15, faces: uniform(Tile.END_PORTAL) },
+  { id: BlockType.CHEST, name: 'Chest', solid: true, opaque: false, transparent: true, liquid: false, light: 0, faces: column(Tile.CHEST, Tile.PLANKS, Tile.CHEST) },
+  { id: BlockType.SPAWNER, name: 'Monster Spawner', solid: true, opaque: false, transparent: true, liquid: false, light: 3, faces: uniform(Tile.SPAWNER) },
 ];
 
 /** Look up a block definition by id (falls back to AIR). */

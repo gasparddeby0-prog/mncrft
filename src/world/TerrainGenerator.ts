@@ -38,6 +38,7 @@ export class TerrainGenerator {
   private readonly cave1: SimplexNoise;
   private readonly cave2: SimplexNoise;
   private readonly ore: SimplexNoise;
+  private readonly ravine: SimplexNoise;
   private readonly seed: number;
 
   constructor(seed: number) {
@@ -51,6 +52,7 @@ export class TerrainGenerator {
     this.cave1 = new SimplexNoise(seed + 6);
     this.cave2 = new SimplexNoise(seed + 7);
     this.ore = new SimplexNoise(seed + 8);
+    this.ravine = new SimplexNoise(seed + 9);
   }
 
   /** Surface terrain height (top solid Y) for a world column. */
@@ -134,6 +136,11 @@ export class TerrainGenerator {
             if (a * a + b * b < 0.0016) {
               block = BlockType.AIR;
             }
+            // Ravines: thin, deep canyons following ridge lines.
+            const rn = this.ravine.noise2D(wx * 0.0075, wz * 0.0075);
+            if (Math.abs(rn) < 0.02 && y > 9 && y < height - 2) {
+              block = BlockType.AIR;
+            }
           }
 
           // Ore placement inside stone, gated by depth.
@@ -169,7 +176,116 @@ export class TerrainGenerator {
       }
     }
 
+    // --- 7: structures (dungeons, villages) stamped deterministically with a
+    // margin so they span chunk borders seamlessly. ---
+    this.generateStructures(voxels, originX, originZ);
+
     return voxels;
+  }
+
+  /** Stamp any dungeons/villages whose footprint overlaps this chunk. */
+  private generateStructures(voxels: Uint8Array, originX: number, originZ: number): void {
+    // Dungeons: one candidate per 32-block region, ~16% chance, underground.
+    const DR = 32;
+    const margin = 6;
+    const rgx0 = Math.floor((originX - margin) / DR);
+    const rgx1 = Math.floor((originX + CHUNK_SIZE + margin) / DR);
+    const rgz0 = Math.floor((originZ - margin) / DR);
+    const rgz1 = Math.floor((originZ + CHUNK_SIZE + margin) / DR);
+    for (let rgx = rgx0; rgx <= rgx1; rgx++) {
+      for (let rgz = rgz0; rgz <= rgz1; rgz++) {
+        if (hashColumn(rgx, rgz, this.seed + 555) >= 0.16) continue;
+        const dx = rgx * DR + 6 + Math.floor(hashColumn(rgx, rgz, this.seed + 556) * 14);
+        const dz = rgz * DR + 6 + Math.floor(hashColumn(rgx, rgz, this.seed + 557) * 14);
+        const surf = this.heightAt(dx + 3, dz + 3);
+        const maxDepth = Math.max(10, surf - 16);
+        const dy = 8 + Math.floor(hashColumn(rgx, rgz, this.seed + 558) * (maxDepth - 8));
+        if (dy + 6 < surf - 2) this.stampDungeon(voxels, originX, originZ, dx, dy, dz);
+      }
+    }
+
+    // Villages: one candidate per 112-block region, ~22% chance, on land.
+    const VR = 112;
+    const vMargin = 16;
+    const vgx0 = Math.floor((originX - vMargin) / VR);
+    const vgx1 = Math.floor((originX + CHUNK_SIZE + vMargin) / VR);
+    const vgz0 = Math.floor((originZ - vMargin) / VR);
+    const vgz1 = Math.floor((originZ + CHUNK_SIZE + vMargin) / VR);
+    for (let vgx = vgx0; vgx <= vgx1; vgx++) {
+      for (let vgz = vgz0; vgz <= vgz1; vgz++) {
+        if (hashColumn(vgx, vgz, this.seed + 777) >= 0.22) continue;
+        const cxw = vgx * VR + 24 + Math.floor(hashColumn(vgx, vgz, this.seed + 778) * 60);
+        const czw = vgz * VR + 24 + Math.floor(hashColumn(vgx, vgz, this.seed + 779) * 60);
+        const offsets: [number, number][] = [[0, 0], [-11, -2], [10, 1], [-2, 11], [3, -12], [12, 12]];
+        for (let i = 0; i < offsets.length; i++) {
+          const hx = cxw + offsets[i][0];
+          const hz = czw + offsets[i][1];
+          const g = this.heightAt(hx + 3, hz + 3);
+          const biome = this.biomeAt(hx + 3, hz + 3, g);
+          if (g < SEA_LEVEL || biome === Biome.OCEAN) continue;
+          this.stampHouse(voxels, originX, originZ, hx, g, hz, i);
+        }
+      }
+    }
+  }
+
+  /** A small cobblestone dungeon room with a spawner and two chests. */
+  private stampDungeon(voxels: Uint8Array, ox: number, oz: number, dx: number, dy: number, dz: number): void {
+    const W = 7, H = 5, D = 7;
+    for (let x = 0; x < W; x++) {
+      for (let z = 0; z < D; z++) {
+        for (let y = 0; y < H; y++) {
+          const shell = x === 0 || x === W - 1 || z === 0 || z === D - 1 || y === 0 || y === H - 1;
+          this.place(voxels, ox, oz, dx + x, dy + y, dz + z, shell ? BlockType.COBBLESTONE : BlockType.AIR, true);
+        }
+      }
+    }
+    this.place(voxels, ox, oz, dx + 3, dy + 1, dz + 3, BlockType.SPAWNER, true);
+    this.place(voxels, ox, oz, dx + 1, dy + 1, dz + 1, BlockType.CHEST, true);
+    this.place(voxels, ox, oz, dx + W - 2, dy + 1, dz + D - 2, BlockType.CHEST, true);
+  }
+
+  /** A small village house: cobble base, plank walls, glass windows, door, roof. */
+  private stampHouse(voxels: Uint8Array, ox: number, oz: number, hx: number, groundY: number, hz: number, variant: number): void {
+    const W = 7, D = 6, wallH = 4;
+    const floorY = groundY;
+    for (let x = 0; x < W; x++) {
+      for (let z = 0; z < D; z++) {
+        // Foundation + clear the interior column above it.
+        this.place(voxels, ox, oz, hx + x, floorY, hz + z, BlockType.COBBLESTONE, true);
+        for (let y = 1; y <= wallH + 1; y++) {
+          this.place(voxels, ox, oz, hx + x, floorY + y, hz + z, BlockType.AIR, true);
+        }
+      }
+    }
+    // Walls.
+    for (let y = 1; y <= wallH; y++) {
+      for (let x = 0; x < W; x++) {
+        for (let z = 0; z < D; z++) {
+          const edge = x === 0 || x === W - 1 || z === 0 || z === D - 1;
+          if (!edge) continue;
+          const corner = (x === 0 || x === W - 1) && (z === 0 || z === D - 1);
+          let block: BlockType = corner ? BlockType.WOOD : BlockType.PLANKS;
+          // Windows at mid height on the long walls.
+          if (y === 2 && !corner && (x === 0 || x === W - 1) && z % 2 === 1) block = BlockType.GLASS;
+          if (y === 2 && !corner && (z === 0 || z === D - 1) && x % 2 === 1) block = BlockType.GLASS;
+          this.place(voxels, ox, oz, hx + x, floorY + y, hz + z, block, true);
+        }
+      }
+    }
+    // Door (front centre, two-high gap).
+    const doorX = hx + 3;
+    this.place(voxels, ox, oz, doorX, floorY + 1, hz, BlockType.AIR, true);
+    this.place(voxels, ox, oz, doorX, floorY + 2, hz, BlockType.AIR, true);
+    // Flat plank roof.
+    for (let x = 0; x < W; x++) {
+      for (let z = 0; z < D; z++) {
+        this.place(voxels, ox, oz, hx + x, floorY + wallH + 1, hz + z, BlockType.PLANKS, true);
+      }
+    }
+    // A crafting table or furnace inside, alternating per house.
+    const fixture = variant % 2 === 0 ? BlockType.CRAFTING_TABLE : BlockType.FURNACE;
+    this.place(voxels, ox, oz, hx + 1, floorY + 1, hz + 1, fixture, true);
   }
 
   /** Decide which ore (if any) replaces stone at a position. */

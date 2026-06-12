@@ -7,11 +7,12 @@
  * presentation — the game tells it what to show.
  */
 
-export interface HotbarItem {
-  tile: number;
-  iconUrl: string;
+export interface HotbarEntry {
+  iconUrl: string | null;
   label: string;
-  key: string;
+  count: number;
+  /** Durability fraction 0..1, or null for non-tools. */
+  durability: number | null;
 }
 
 export class HUD {
@@ -46,6 +47,7 @@ export class HUD {
     this.hotbarEl = document.createElement('div');
     this.hotbarEl.className = 'hotbar';
     this.root.appendChild(this.hotbarEl);
+    this.buildHotbarSlots();
 
     this.debugEl = document.createElement('div');
     this.debugEl.className = 'debug';
@@ -60,26 +62,48 @@ export class HUD {
     this.root.appendChild(this.hurtEl);
   }
 
-  /** Populate the hotbar with block icons. */
-  setHotbar(items: HotbarItem[]): void {
+  /** Build the nine empty hotbar slots once (with their number labels). */
+  private buildHotbarSlots(): void {
     this.hotbarEl.innerHTML = '';
-    this.slots = items.map((item) => {
+    this.slots = [];
+    for (let i = 0; i < 9; i++) {
       const slot = document.createElement('div');
       slot.className = 'slot';
-      slot.title = item.label;
-
       const key = document.createElement('span');
       key.className = 'key';
-      key.textContent = item.key;
+      key.textContent = String((i + 1) % 10);
       slot.appendChild(key);
+      this.hotbarEl.appendChild(slot);
+      this.slots.push(slot);
+    }
+  }
+
+  /** Update the hotbar from the player's inventory stacks. */
+  updateHotbar(entries: HotbarEntry[]): void {
+    entries.forEach((entry, i) => {
+      const slot = this.slots[i];
+      if (!slot) return;
+      slot.title = entry.label;
+      slot.querySelectorAll('img, .count, .durability').forEach((n) => n.remove());
+      if (!entry.iconUrl) return;
 
       const img = document.createElement('img');
-      img.src = item.iconUrl;
-      img.alt = item.label;
+      img.src = entry.iconUrl;
+      img.alt = entry.label;
       slot.appendChild(img);
 
-      this.hotbarEl.appendChild(slot);
-      return slot;
+      if (entry.count > 1) {
+        const n = document.createElement('span');
+        n.className = 'count';
+        n.textContent = String(entry.count);
+        slot.appendChild(n);
+      }
+      if (entry.durability !== null) {
+        const bar = document.createElement('div');
+        bar.className = 'durability';
+        bar.style.width = `${Math.max(0, Math.min(1, entry.durability)) * 100}%`;
+        slot.appendChild(bar);
+      }
     });
   }
 

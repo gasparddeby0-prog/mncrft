@@ -96,7 +96,9 @@ function faceTile(block: number, faceIndex: number): number {
 
 function layerOf(block: number): RenderLayer {
   const def = getBlock(block);
-  if (def.liquid || block === BlockType.GLASS) return RenderLayer.TRANSLUCENT;
+  if (def.liquid || block === BlockType.GLASS || block === BlockType.NETHER_PORTAL || block === BlockType.END_PORTAL) {
+    return RenderLayer.TRANSLUCENT;
+  }
   if (def.transparent) return RenderLayer.CUTOUT;
   return RenderLayer.SOLID;
 }

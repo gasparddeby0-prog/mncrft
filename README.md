@@ -39,6 +39,23 @@ problème de licence.
   fuite quand on les frappe) et **zombies hostiles** (poursuite + attaque au
   corps à corps). Modèles cubiques **animés** (pattes, ailes, bras), apparition
   jour/nuit, combat (clic gauche) avec recul.
+- 🎒 **Inventaire complet** : hotbar + coffre principal + 4 emplacements
+  d'armure, déplacement d'objets à la souris (écran ouvert avec **E**).
+- 🛠️ **Minage réaliste** : durée selon la dureté du bloc et l'outil, **butin**
+  ramassé dans l'inventaire (selon le palier d'outil), **usure** des outils.
+- ⚒️ **Table de craft** (3×3) + craft 2×2 dans l'inventaire, **système de
+  recettes** complet (planches, bâtons, table, four, coffre, tous les outils et
+  toutes les armures).
+- 🔥 **Four** fonctionnel (fonte minerai → lingot, sable → verre…) avec
+  combustible et progression, et **coffres** de stockage.
+- 🧰 **Items** : outils (pioche/hache/pelle/épée en bois, pierre, fer, diamant),
+  **armures** (fer/or/diamant : casque, plastron, jambières, bottes — réduisent
+  les dégâts), lingots, charbon, diamant, silex, briquet…
+- 🌋 **3 dimensions** : Overworld, **Nether** (mers de lave, glowstone, soul
+  sand) et **The End** (îles d'end stone flottantes). Voyage par **portails**
+  (cadre d'obsidienne allumé au briquet) ou touche **F4** (admin).
+- 🏰 **Structures** : villages (maisons en planches avec fenêtres, four/table),
+  donjons (salle en pierres + spawner + coffres), ravins, grottes, minerais.
 - ☀️🌙 **Cycle jour/nuit complet** avec soleil/lune, ciel et brouillard dynamiques.
 - 🌧️ **Météo** : pluie, **orages** (éclairs), neige — système de particules réel.
 - 💾 **Sauvegarde automatique** (IndexedDB) du joueur et des blocs modifiés.
@@ -94,7 +111,9 @@ Guide détaillé : [`docs/BUILD.md`](docs/BUILD.md).
 | Activer/désactiver le vol | `F` |
 | Casser un bloc / attaquer un mob | Clic gauche |
 | Poser un bloc | Clic droit |
-| Sélectionner un bloc | `1`–`0` ou molette |
+| Sélectionner un bloc | `1`–`9` ou molette |
+| Ouvrir l'inventaire / craft | `E` |
+| Changer de dimension (admin) | `F4` |
 | Météo suivante | `R` |
 | Temps normal / rapide | `T` |
 | Distance de rendu −/+ | `[` / `]` |

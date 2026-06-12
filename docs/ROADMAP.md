@@ -13,14 +13,14 @@ dans ce dépôt. Honnêteté avant tout : `✅ fait`, `🟡 partiel`, `⬜ à ve
 | Cycle jour/nuit + éclairage dynamique | ✅ | `Environment`. |
 | Système météo (pluie, orages, neige) | ✅ | Particules + éclairs. |
 | Moteur voxel performant | 🟡 | Face culling + frustum culling + AO. **Occlusion culling** (HZB) et **greedy meshing** : non encore — voir notes. |
-| Inventaire complet | 🟡 | Hotbar 10 emplacements. Inventaire/coffres à grille : ⬜. |
-| Crafting identique à Minecraft | ⬜ | Système d'objets/recettes à implémenter. |
-| Fourneaux, coffres, enclumes, tables d'enchantement | ⬜ | Nécessite blocs à entité + UI dédiées. |
-| Survie : faim, vie, régénération, dégâts de chute | 🟡 | Vie ✅, régénération ✅, dégâts de chute ✅. Faim/nourriture ⬜. |
-| IA des créatures (passives/hostiles) | 🟡 | Errance/fuite (passifs) + poursuite/attaque (zombie). Pathfinding A* ⬜. |
+| Inventaire complet | ✅ | Hotbar + 27 slots + 4 armures, déplacement souris. |
+| Crafting identique à Minecraft | ✅ | Craft 2×2 + table 3×3, recettes façonnées/informes. |
+| Fourneaux, coffres, enclumes, tables d'enchantement | 🟡 | Four (fonte+combustible) ✅, coffres ✅, table de craft ✅. Enclume/enchantement ⬜. |
+| Survie : faim, vie, régénération, dégâts de chute | 🟡 | Vie ✅, régén ✅, chute ✅, armure (réduction dégâts) ✅. Faim ⬜. |
+| IA des créatures (passives/hostiles) | 🟡 | Errance/fuite + poursuite/attaque. Pathfinding A* ⬜. |
 | Zombies, squelettes, creepers, araignées, animaux | 🟡 | Vache/cochon/poule + zombie ✅. Squelettes/creepers/araignées ⬜. |
-| Villages, grottes, ravins, donjons, structures | 🟡 | Grottes ✅. Ravins/villages/donjons/structures ⬜. |
-| Minéraux selon la profondeur | ✅ | Charbon/fer/or/diamant par paliers. |
+| Villages, grottes, ravins, donjons, structures | ✅ | Villages, donjons (spawner+coffres), ravins, grottes ✅. |
+| Minéraux selon la profondeur | ✅ | Charbon/fer/or/diamant par paliers + minage par palier d'outil. |
 | Redstone + logique électrique | ⬜ | Simulation de signal à concevoir. |
 | Multijoueur client/serveur | ⬜ | Architecture prête (monde sans rendu) ; netcode à écrire. |
 | Sauvegarde automatique | ✅ | IndexedDB, joueur + blocs modifiés. |
@@ -54,8 +54,8 @@ dans ce dépôt. Honnêteté avant tout : `✅ fait`, `🟡 partiel`, `⬜ à ve
 | Bonus | État |
 | --- | --- |
 | Support des mods | ⬜ |
-| Dimensions alternatives | ⬜ |
-| Commandes administrateur | ⬜ |
+| Dimensions alternatives | ✅ (Nether + End, portails + voyage F4) |
+| Commandes administrateur | 🟡 (voyage de dimension F4 ; console de commandes ⬜) |
 | Optimisations type « mods de performance » | 🟡 (face culling, AO, frustum, workers ; greedy meshing/occlusion à venir) |
 | Outils de débogage intégrés | ✅ (overlay F3 : fps, position, biome, chunks, file de maillage, météo…) |
 

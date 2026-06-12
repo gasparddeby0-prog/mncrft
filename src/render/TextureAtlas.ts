@@ -277,6 +277,133 @@ function drawCactusTop(ctx: CanvasRenderingContext2D): void {
   }
 }
 
+function drawCraftingTop(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.CRAFTING_TOP);
+  fillNoise(p, [150, 110, 66], 8, 24001);
+  // 3x3 crafting grid grooves.
+  for (let i = 0; i <= TILE_SIZE; i += 5) {
+    for (let k = 0; k < TILE_SIZE; k++) {
+      p.px(Math.min(i, TILE_SIZE - 1), k, 'rgb(70,48,26)');
+      p.px(k, Math.min(i, TILE_SIZE - 1), 'rgb(70,48,26)');
+    }
+  }
+}
+
+function drawCraftingSide(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.CRAFTING_SIDE);
+  fillNoise(p, [150, 110, 66], 8, 24101);
+  const r = rng(24102);
+  // Tool silhouettes (saw / hammer) sketched with dark pixels.
+  for (let y = 2; y < 7; y++) p.px(4 + (y % 2), y, vary([60, 42, 24], 6, r));
+  for (let x = 8; x < 13; x++) p.px(x, 5, 'rgb(60,42,24)');
+  for (let y = 9; y < 14; y++) p.px(9, y, 'rgb(60,42,24)');
+}
+
+function drawFurnaceFront(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.FURNACE_FRONT);
+  fillNoise(p, [110, 110, 113], 10, 24201);
+  // Dark furnace mouth in the lower-middle.
+  for (let y = 8; y < 14; y++) {
+    for (let x = 4; x < 12; x++) {
+      p.px(x, y, y > 11 ? 'rgb(40,30,25)' : 'rgb(25,22,22)');
+    }
+  }
+}
+
+function drawFurnaceTop(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.FURNACE_TOP);
+  fillNoise(p, [95, 95, 98], 8, 24301);
+  for (let x = 5; x < 11; x++) {
+    p.px(x, 5, 'rgb(55,55,58)');
+    p.px(x, 10, 'rgb(55,55,58)');
+  }
+}
+
+function drawObsidian(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.OBSIDIAN);
+  fillNoise(p, [22, 18, 34], 10, 24401);
+  speckle(p, [70, 50, 110], 0.08, 24, 24402);
+}
+
+function drawNetherrack(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.NETHERRACK);
+  fillNoise(p, [110, 38, 38], 22, 24501);
+  speckle(p, [70, 20, 20], 0.18, 14, 24502);
+}
+
+function drawGlowstone(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.GLOWSTONE);
+  fillNoise(p, [180, 140, 70], 18, 24601);
+  speckle(p, [255, 225, 130], 0.3, 25, 24602);
+}
+
+function drawSoulSand(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.SOUL_SAND);
+  fillNoise(p, [90, 70, 56], 12, 24701);
+  // A couple of dark "faces" hollows.
+  const r = rng(24702);
+  for (let i = 0; i < 2; i++) {
+    const cx = 4 + Math.floor(r() * 8);
+    const cy = 4 + Math.floor(r() * 8);
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) p.px(cx + dx, cy + dy, 'rgb(55,42,34)');
+  }
+}
+
+function drawEndStone(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.END_STONE);
+  fillNoise(p, [221, 224, 170], 10, 24801);
+  speckle(p, [200, 200, 150], 0.12, 12, 24802);
+}
+
+function drawNetherPortal(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.NETHER_PORTAL);
+  const r = rng(24901);
+  for (let y = 0; y < TILE_SIZE; y++) {
+    for (let x = 0; x < TILE_SIZE; x++) {
+      const swirl = Math.sin((x + y) * 0.9 + r() * 0.4) * 0.5 + 0.5;
+      const a = 0.45 + swirl * 0.4;
+      p.ctx.fillStyle = `rgba(${120 + swirl * 80 | 0},${40 + swirl * 30 | 0},${170 + swirl * 60 | 0},${a.toFixed(2)})`;
+      p.ctx.fillRect(p.ox + x, p.oy + y, 1, 1);
+    }
+  }
+}
+
+function drawEndPortal(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.END_PORTAL);
+  fillNoise(p, [8, 10, 22], 6, 25001);
+  const r = rng(25002);
+  for (let i = 0; i < 22; i++) {
+    const x = Math.floor(r() * TILE_SIZE);
+    const y = Math.floor(r() * TILE_SIZE);
+    const c = r() < 0.5 ? 'rgb(180,230,220)' : 'rgb(120,150,230)';
+    p.px(x, y, c);
+  }
+}
+
+function drawChest(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.CHEST);
+  fillNoise(p, [150, 110, 60], 8, 25101);
+  // Iron latch + banding.
+  for (let x = 0; x < TILE_SIZE; x++) {
+    p.px(x, 7, 'rgb(90,64,32)');
+  }
+  for (let y = 6; y < 10; y++) {
+    p.px(7, y, 'rgb(70,70,74)');
+    p.px(8, y, 'rgb(70,70,74)');
+  }
+}
+
+function drawSpawner(ctx: CanvasRenderingContext2D): void {
+  const p = painter(ctx, Tile.SPAWNER);
+  // Dark iron cage: grid of bars over black.
+  for (let y = 0; y < TILE_SIZE; y++) {
+    for (let x = 0; x < TILE_SIZE; x++) {
+      const bar = x % 4 === 0 || y % 4 === 0;
+      p.px(x, y, bar ? 'rgb(60,66,70)' : 'rgb(18,20,24)');
+    }
+  }
+}
+
 /** Paint every block tile onto a freshly-cleared atlas context. */
 function drawAllTiles(ctx: CanvasRenderingContext2D): void {
   drawStone(ctx);
@@ -301,6 +428,19 @@ function drawAllTiles(ctx: CanvasRenderingContext2D): void {
   drawLava(ctx);
   drawCactusSide(ctx);
   drawCactusTop(ctx);
+  drawCraftingTop(ctx);
+  drawCraftingSide(ctx);
+  drawFurnaceFront(ctx);
+  drawFurnaceTop(ctx);
+  drawObsidian(ctx);
+  drawNetherrack(ctx);
+  drawGlowstone(ctx);
+  drawSoulSand(ctx);
+  drawEndStone(ctx);
+  drawNetherPortal(ctx);
+  drawEndPortal(ctx);
+  drawChest(ctx);
+  drawSpawner(ctx);
 }
 
 /** Build and return the shared block texture. */

@@ -13,6 +13,10 @@ import { ChunkMesher, RenderLayer } from '../src/render/ChunkMesher';
 import { Cow, Zombie } from '../src/entity/mobs';
 import { EntityManager } from '../src/entity/EntityManager';
 import { Player } from '../src/player/Player';
+import { matchCrafting } from '../src/item/recipes';
+import { Inventory, makeStack } from '../src/item/Inventory';
+import { NetherGenerator } from '../src/world/dimensions/NetherGenerator';
+import { EndGenerator } from '../src/world/dimensions/EndGenerator';
 
 let failures = 0;
 function assert(cond: unknown, msg: string): void {
@@ -143,6 +147,46 @@ const victim = new Cow();
 victim.setPosition(0, 0, 0);
 victim.damage(100, 0, 1);
 assert(victim.dead, 'lethal damage marks the entity dead');
+
+console.log('crafting recipes');
+assert(matchCrafting(['wood', null, null, null], 2)?.result === 'planks', 'wood -> planks (shapeless)');
+assert(matchCrafting(['planks', null, 'planks', null], 2)?.result === 'stick', '2 planks -> sticks');
+const pick = matchCrafting(['diamond', 'diamond', 'diamond', null, 'stick', null, null, 'stick', null], 3);
+assert(pick?.result === 'diamond_pickaxe', '3x3 -> diamond pickaxe');
+const furnace = matchCrafting(
+  ['cobblestone', 'cobblestone', 'cobblestone', 'cobblestone', null, 'cobblestone', 'cobblestone', 'cobblestone', 'cobblestone'],
+  3,
+);
+assert(furnace?.result === 'furnace', '8 cobblestone -> furnace');
+
+console.log('inventory');
+const inv = new Inventory();
+const leftover = inv.add('cobblestone', 70);
+assert(leftover === 0 && inv.count('cobblestone') === 70, 'stacking across slots (70 cobblestone)');
+inv.selected = 0;
+inv.decrementSelected();
+assert(inv.count('cobblestone') === 69, 'decrement selected stack');
+inv.armor[0] = makeStack('diamond_helmet');
+inv.armor[1] = makeStack('diamond_chest');
+inv.armor[2] = makeStack('diamond_legs');
+inv.armor[3] = makeStack('diamond_boots');
+assert(inv.totalDefense() === 20, 'full diamond armour = 20 defense points');
+
+console.log('nether & end generation');
+const nether = new NetherGenerator(1).generateChunk(0, 0);
+let netherrack = 0;
+let lava = 0;
+for (let i = 0; i < nether.length; i++) {
+  if (nether[i] === BlockType.NETHERRACK) netherrack++;
+  if (nether[i] === BlockType.LAVA) lava++;
+}
+assert(netherrack > 2000, `nether is full of netherrack (${netherrack})`);
+assert(lava > 0, `nether has lava (${lava})`);
+
+const end = new EndGenerator(1).generateChunk(0, 0);
+let endStone = 0;
+for (let i = 0; i < end.length; i++) if (end[i] === BlockType.END_STONE) endStone++;
+assert(endStone > 100, `end island exists near origin (${endStone})`);
 
 console.log(failures ? `\n${failures} FAILURE(S)` : '\nALL CHECKS PASSED');
 if (failures) process.exit(1);
